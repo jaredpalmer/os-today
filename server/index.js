@@ -53,7 +53,7 @@ if (__PROD__) {
   server.use(middleware)
   server.use(webpackHotMiddleware(compiler))
 }
-
+server.get('/api/repos', require('./repos').default)
 server.use(express.static(path.join(__dirname, '../public')))
 
 server.get('*', (req, res) => {

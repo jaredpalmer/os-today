@@ -11,7 +11,14 @@ class Feed extends React.Component {
   }
 
   componentDidMount () {
-    fetch('https://api.github.com/users/jaredpalmer/starred')
+    fetch('/api/repos', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'same-origin'
+    })
     .then(res => res.json())
     .then(res => this.setState({repos: res}))
   }
