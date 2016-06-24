@@ -1,0 +1,12 @@
+body {
+  font-family: 'Roboto Mono', Menlo, monospace;
+  font-weight: 300;
+}
+h1,h2,h3,h4,h5,h6,p {
+  margin: 0;
+  padding: 0;
+}
+
+/*.gh-emoji {
+  height: 14px;
+}*/

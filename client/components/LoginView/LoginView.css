@@ -1,0 +1,11 @@
+.root {
+  margin: 1rem;
+}
+
+.github {
+  background: #111;
+  color: #fff;
+  padding: 1rem 2rem;
+  font-family: Menlo, monospace;
+  font-weight: bold;
+}

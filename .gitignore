@@ -1,0 +1,6 @@
+lib
+node_modules
+public/assets
+assets.json
+npm-debug.log
+.nyc_output
