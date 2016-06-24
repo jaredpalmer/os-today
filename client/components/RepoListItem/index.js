@@ -1,19 +1,7 @@
 import React from 'react'
-import { load, parse } from 'gh-emoji'
 import s from './RepoListItem.css'
 
 class RepoListItem extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      desc: ''
-    }
-  }
-
-  componentDidMount () {
-    load().then(() => this.setState({desc: parse(this.props.repo.description)}))
-  }
-
   render () {
     const { repo } = this.props
     return (
@@ -22,8 +10,8 @@ class RepoListItem extends React.Component {
           <img className={s.avatar} src={repo.owner.avatar_url} alt={repo.owner.login}/>
         </div>
         <div>
-          <h3 className={s.full_name}>{repo.full_name}</h3>
-          <div className={s.description} dangerouslySetInnerHTML={{ __html: this.state.desc }} />
+          <h3 className={s.full_name}><a href={repo.html_url} target='_blank'>{repo.full_name}</a></h3>
+          <p className={s.description}>{repo.description}</p>
         </div>
         <div className={s.stargazers_count}>{repo.stargazers_count}</div>
       </div>
