@@ -4,3 +4,4 @@ public/assets
 assets.json
 npm-debug.log
 .nyc_output
+.env
