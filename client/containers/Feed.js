@@ -6,20 +6,24 @@ class Feed extends React.Component {
   constructor () {
     super()
     this.state = {
+      isLoading: false,
       repos: []
     }
   }
 
   componentDidMount () {
-    fetch('https://api.github.com/users/jaredpalmer/starred')
+    this.setState({ isLoading: true, repos: [] })
+    fetch(`https://api.github.com/users/${window.__STATE__.user.login}/starred`)
     .then(res => res.json())
-    .then(res => this.setState({repos: res}))
+    .then(res => this.setState({repos: res, isLoading: false}))
   }
 
   render () {
     return (
       <div>
-        <RepoList repos={this.state.repos} />
+        {this.state.isLoading
+          ? <div>Loading....</div>
+          : <RepoList repos={this.state.repos} />}
       </div>
     )
   }

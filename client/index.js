@@ -5,7 +5,8 @@ import 'sanitize.css/sanitize.css'
 import './global.css'
 import configureStore from './store/configureStore'
 
-const store = configureStore()
+const initialState = window.__STATE__
+const store = configureStore(initialState)
 const rootEl = document.getElementById('root')
 
 /**

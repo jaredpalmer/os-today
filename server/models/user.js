@@ -62,6 +62,48 @@ export async function createAndStar (username, repo) {
   return Repo.star(username, repoNode.id)
 }
 
+export const findByUsername = (login) => {
+  const session = db.session()
+  const q = `
+    MATCH (u:User { login: { login }})
+    RETURN u
+  `
+  return session
+    .run(q, { login })
+    .then(result => {
+      session.close()
+      return result.records[0].get('u').properties
+    })
+}
+
+export const findById = (id) => {
+  const session = db.session()
+  const q = `
+    MATCH (u:User { id: { id }})
+    RETURN u
+  `
+  return session
+    .run(q, { id })
+    .then(result => {
+      session.close()
+      return result.records[0].get('u').properties
+    })
+}
+
+export const findOrCreate = ({ login }) => {
+  const session = db.session()
+  const q = `
+    MERGE (u:User { login: { login }})
+    RETURN u
+  `
+  return session
+    .run(q, { login })
+    .then(result => {
+      session.close()
+      return result.records[0].get('u').properties
+    })
+}
+
 
 export async function createAndFollow (myLogin, friend){
   const friendNode = await create(friend)

@@ -1,47 +1,20 @@
 import React from 'react'
-import { load, parse } from 'gh-emoji'
 import s from './RepoListItem.css'
 
-class RepoListItem extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      desc: ''
-    }
-  }
-
-  componentDidMount () {
-    load().then(() => this.setState({desc: parse(this.props.repo.description)}))
-  }
-
-  render () {
-    const { repo } = this.props
-    return (
-      <div className={s.root}>
-        <div>
-          <img className={s.avatar} src={repo.owner.avatar_url} alt={repo.owner.login}/>
-        </div>
-        <div>
-          <h3 className={s.full_name}>{repo.full_name}</h3>
-          <div className={s.description} dangerouslySetInnerHTML={{ __html: this.state.desc }} />
-        </div>
-        <div className={s.stargazers_count}>{repo.stargazers_count}</div>
+const RepoListItem = ({ repo }) => (
+  <div className={s.root}>
+    <div>
+      <img className={s.avatar} src={repo.owner.avatar_url} alt={repo.owner.login} />
+    </div>
+    <div>
+      <h3 className={s.RepoName}><a className={s.RepoNameLink}href={repo.html_url} target='_blank'>{repo.full_name}</a></h3>
+      <div className={s.description}>{repo.description}</div>
+      <div>
+        <svg className={s.StarIcon} xmlns='http://www.w3.org/2000/svg' width='13' height='15' viewBox='0 0 14 16'><path d='M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z' /></svg>
+        <span className={s.StarCount}>{repo.stargazers_count}</span>
       </div>
-    )
-  }
-}
-
-// const RepoListItem = ({ repo }) => (
-//   <div className={s.root}>
-//     <div>
-//       <img className={s.avatar} src={repo.owner.avatar_url} alt={repo.owner.login}/>
-//     </div>
-//     <div>
-//       <h3 className={s.full_name}>{repo.full_name}</h3>
-//       <p className={s.description}>{}</p>
-//     </div>
-//     <div className={s.stargazers_count}>{repo.stargazers_count}</div>
-//   </div>
-// )
+    </div>
+  </div>
+)
 
 export default RepoListItem
