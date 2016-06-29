@@ -70,7 +70,7 @@ server.get('/auth/github', passport.authenticate('github', { scope: ['user', 'pu
 server.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('/')r
+    res.redirect('/')
   })
 
 server.get('/*', (req, res) => {
