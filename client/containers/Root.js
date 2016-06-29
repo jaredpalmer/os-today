@@ -5,6 +5,12 @@ import App from './App'
 import LoginView from '../components/LoginView'
 import NotFoundView from '../components/NotFoundView'
 import Feed from './Feed'
+import { UserAuthWrapper } from 'redux-auth-wrapper'
+
+const UserIsAuthenticated = UserAuthWrapper({
+  authSelector: state => state.user,
+  wrapperDisplayName: 'UserIsAuthenticated'
+})
 /**
  * Root is exported for conditional usage index.js.
  * It's not 'real' a container, BUT it's special because it enables us to use
@@ -18,7 +24,7 @@ const Root = ({ store }) => (
         {/* IndexRoute is the initial component that is loaded,
             other routes are loaded according to the component
             property specified here */}
-        <IndexRoute component={Feed} />
+        <IndexRoute component={UserIsAuthenticated(Feed)} />
         <Route path='login' component={LoginView} />
         <Route path='*' component={NotFoundView} />
       </Route>

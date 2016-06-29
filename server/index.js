@@ -39,6 +39,7 @@ if (__PROD__) {
   assets = require('../assets.json')
   server.use(helmet())
   server.use(compression())
+  server.use(morgan('combined'))
 } else {
   config = require('../tools/webpack.dev')
   const webpack = require('webpack')
@@ -72,6 +73,11 @@ server.get('/auth/github/callback',
   (req, res) => {
     res.redirect('/')
   })
+
+server.get('/logout', (req, res) => {
+  req.logout()
+  res.redirect('/login')
+})
 
 server.get('/*', (req, res) => {
   res.send(`
