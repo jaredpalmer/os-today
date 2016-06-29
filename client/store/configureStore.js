@@ -3,11 +3,12 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import rootReducer from '../reducers'
 import thunk from 'redux-thunk'
 
-export default function configureStore () {
+export default function configureStore (initialState) {
   const middlewares = [thunk]
 
   const store = createStore(
     rootReducer,
+    initialState,
     compose(
       applyMiddleware(...middlewares),
       __DEV__ &&

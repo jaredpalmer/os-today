@@ -4,8 +4,11 @@ import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
 import path from 'path'
-import session from 'express-session'
 import cookieParser from 'cookie-parser'
+import serialize from 'serialize-javascript'
+import session from 'express-session'
+const RedisStore = require('connect-redis')(session)
+import passport from './auth'
 
 const __PROD__ = process.env.NODE_ENV === 'production'
 let config, assets
@@ -15,8 +18,9 @@ const server = express()
 server.disable('x-powered-by')
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))
-
+server.use(cookieParser(process.env.COOKIE_SECRET || 'keyboard cat'))
 server.use(session({
+  store: new RedisStore({ url: process.env.REDIS_URL || 'redis://localhost:6379' }),
   secret: process.env.COOKIE_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: true,
@@ -27,13 +31,15 @@ server.use(session({
   }
 }))
 
-server.use(cookieParser(process.env.COOKIE_SECRET || 'keyboard cat'))
+server.use(passport.initialize())
+server.use(passport.session())
 
 if (__PROD__) {
   config = require('../tools/webpack.prod')
   assets = require('../assets.json')
   server.use(helmet())
   server.use(compression())
+  server.use(morgan('combined'))
 } else {
   config = require('../tools/webpack.dev')
   const webpack = require('webpack')
@@ -46,7 +52,11 @@ if (__PROD__) {
     silent: true,
     stats: {
       colors: true,
-      progress: true
+      hash: false,
+      timings: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false
     }
   })
   server.use(morgan('dev'))
@@ -56,14 +66,27 @@ if (__PROD__) {
 
 server.use(express.static(path.join(__dirname, '../public')))
 
-server.get('*', (req, res) => {
+server.get('/auth/github', passport.authenticate('github', { scope: ['user', 'public_repo'] }))
+
+server.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/')
+  })
+
+server.get('/logout', (req, res) => {
+  req.logout()
+  res.redirect('/login')
+})
+
+server.get('/*', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <title>Yolo</title>
+        <title>Open Source Today</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/x-icon" href="favicon.ico">
         <link rel="stylesheet" href="${__PROD__ ? assets.main.css : 'assets/styles.css'}" />
@@ -72,6 +95,7 @@ server.get('*', (req, res) => {
         <div id="root"></div>
         <script>window.Promise || document.write('\\x3Cscript src=\"/es6-promise.min.js\">\\x3C/script>\\x3Cscript>ES6Promise.polyfill()\\x3C/script>')</script>
         <script>window.fetch || document.write('\\x3Cscript src=\"/fetch.min.js\">\\x3C/script>')</script>
+        <script>window.__STATE__=${serialize({user: req.user || null})};</script>
         <script src="${__PROD__ ? assets.vendor.js : 'assets/vendor.js'}"></script>
         <script src="${__PROD__ ? assets.main.js : 'assets/main.js'}"></script>
       </body>
