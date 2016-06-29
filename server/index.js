@@ -95,7 +95,7 @@ server.get('/*', (req, res) => {
         <div id="root"></div>
         <script>window.Promise || document.write('\\x3Cscript src=\"/es6-promise.min.js\">\\x3C/script>\\x3Cscript>ES6Promise.polyfill()\\x3C/script>')</script>
         <script>window.fetch || document.write('\\x3Cscript src=\"/fetch.min.js\">\\x3C/script>')</script>
-        <script>window.__STATE__ = ${serialize({user: req.user || null})}</script>
+        <script>window.__STATE__=${serialize({user: req.user || null})};</script>
         <script src="${__PROD__ ? assets.vendor.js : 'assets/vendor.js'}"></script>
         <script src="${__PROD__ ? assets.main.js : 'assets/main.js'}"></script>
       </body>
