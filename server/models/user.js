@@ -1,130 +1,47 @@
 import db from './db'
-import fetch from 'isomorphic-fetch'
-import * as Repo from './repo'
-const Promise = require('bluebird')
 
-export const getFollowing = (username) => {
-  return fetch(`https://api.github.com/users/${username}/following`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(res => res.json())
-}
-
-export const follow = (user, friend) => {
-  const session = db.session()
-  const q = `
-    MATCH (u:User { login: { user } }), (f:User { login: { friend } })
-    MERGE (u)-[r:FOLLOWING]->(f)
-    RETURN f
-  `
-  return session
-    .run(q, { user: user, friend: friend })
-    .then((result) => {
-      session.close()
-      return result.records[0].get('f').properties
-    })
-}
-
-export const create = (options) => {
-  const session = db.session()
-  const q = `
+export const create = (options, cb) => {
+  const query = `
     CREATE (u:User { options })
     RETURN u
   `
-  return session
-    .run(q, { options })
-    .then(result => {
-      // session.close()
-      return result.records[0].get('u').properties
-    })
-}
-
-export const getStarred = (user) => {
-  return fetch(`https://api.github.com/users/${user.login}/starred`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+  db.cypher({ query, params: options, lean: true }, (err, result) => {
+    if (err) throw cb(err)
+    cb(null, result[0].u)
   })
-  .then(res => res.json())
 }
 
-export async function createAndStar (username, repo) {
-  const repoNode = await Repo.create({
-    id: repo.id,
-    name: repo.name
-  })
-  return Repo.star(username, repoNode.id)
-}
 
-export const findByUsername = (login) => {
-  const session = db.session()
-  const q = `
+
+export const findByUsername = (login, cb) => {
+  const query = `
     MATCH (u:User { login: { login }})
     RETURN u
   `
-  return session
-    .run(q, { login })
-    .then(result => {
-      session.close()
-      return result.records[0].get('u').properties
-    })
+  db.cypher({ query, params: { login }, lean: true }, (err, result) => {
+    if (err) throw cb(err)
+    cb(null, result[0].u)
+  })
 }
 
-export const findById = (id) => {
-  const session = db.session()
-  const q = `
+export const findById = (id, cb) => {
+  const query = `
     MATCH (u:User { id: { id }})
     RETURN u
   `
-  return session
-    .run(q, { id })
-    .then(result => {
-      session.close()
-      return result.records[0].get('u').properties
-    })
+  db.cypher({ query, params: { id }, lean: true }, (err, result) => {
+    if (err) throw cb(err)
+    cb(null, result[0].u)
+  })
 }
 
-export const findOrCreate = ({ login }) => {
-  const session = db.session()
-  const q = `
+export const findOrCreate = ({ login }, cb) => {
+  const query = `
     MERGE (u:User { login: { login }})
     RETURN u
   `
-  return session
-    .run(q, { login })
-    .then(result => {
-      session.close()
-      return result.records[0].get('u').properties
-    })
-}
-
-
-export async function createAndFollow (myLogin, friend){
-  const friendNode = await create(friend)
-  return follow(myLogin, friend.login)
-}
-
-export async function createFriendGraph (username) {
-  const friends = await getFollowing(username)
-  return Promise
-    .map(friends, friend => {
-      return createAndFollow(username, friend)
-    })
-    .each(f => {
-      return Promise.map(getStarred(f), repo => {
-        return createAndStar(f.login, repo)
-      })
-    })
-}
-
-export const createStarGraph = (user) => {
-  return Promise.map(getStarred(user), repo => {
-    return createAndStar(user.login, repo)
+  db.cypher({ query, params: { login }, lean: true }, (err, result) => {
+    if (err) throw cb(err)
+    cb(null, result[0].u)
   })
 }

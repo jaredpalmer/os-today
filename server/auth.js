@@ -7,13 +7,10 @@ passport.use(new GitHubStrategy({
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:5000/auth/github/callback'
 }, (accessToken, refreshToken, profile, done) => {
-  User.findOrCreate({ login: profile.username })
-    .then(user => {
-      done(null, user)
-    })
-    .catch(e => {
-      done(e, null)
-    })
+  User.findOrCreate({ login: profile.username }, (err, user) => {
+    if (err) done(err, null)
+    done(null, user)
+  })
 }))
 
 passport.serializeUser((user, done) => {
@@ -21,13 +18,10 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((login, done) => {
-  User.findByUsername(login)
-    .then(user => {
-      done(null, user)
-    })
-    .catch(e => {
-      done(e, null)
-    })
+  User.findByUsername(login, (err, user) => {
+    if (err) done(err, null)
+    done(null, user)
+  })
 })
 
 export default passport
