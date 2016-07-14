@@ -27,7 +27,7 @@ server.use(session({
   key: 'sessionId', // Use generic cookie name for security purposes
   cookie: {
     httpOnly: true, // Add HTTPOnly, Secure attributes on Session Cookie
-    secure: __PROD__ // If secure is set, and you access your site over HTTP, the cookie will not be set
+    secure: false // If secure is set, and you access your site over HTTP, the cookie will not be set
   }
 }))
 
