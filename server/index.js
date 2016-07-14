@@ -35,7 +35,6 @@ server.use(passport.initialize())
 server.use(passport.session())
 
 if (__PROD__) {
-  config = require('../tools/webpack.prod')
   assets = require('../assets.json')
   server.use(helmet())
   server.use(compression())
@@ -103,6 +102,6 @@ server.get('/*', (req, res) => {
   `)
 })
 
-server.listen(process.env.PORT || 5000, '0.0.0.0', () => {
+server.listen(process.env.PORT || 5000, () => {
   console.log('Listening on port 5000')
 })
