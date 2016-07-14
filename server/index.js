@@ -20,7 +20,7 @@ server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({ extended: true }))
 server.use(cookieParser(process.env.COOKIE_SECRET || 'keyboard cat'))
 server.use(session({
-  // store: new RedisStore({ url: process.env.REDIS_URL || 'redis://localhost:6379' }),
+  store: new RedisStore({ url: process.env.REDIS_URL || 'redis://localhost:6379' }),
   secret: process.env.COOKIE_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: true,
