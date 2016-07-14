@@ -1,3 +1,9 @@
 machine:
   node:
     version: 6.2.2
+
+deployment:
+  production:
+    branch: master
+    heroku:
+      appname: os-today
