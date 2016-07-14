@@ -103,6 +103,6 @@ server.get('/*', (req, res) => {
   `)
 })
 
-server.listen(5000, '0.0.0.0', () => {
+server.listen(process.env.PORT || 5000, '0.0.0.0', () => {
   console.log('Listening on port 5000')
 })
