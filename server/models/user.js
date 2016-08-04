@@ -19,7 +19,10 @@ export const findByUsername = (login, cb) => {
     RETURN u
   `
   db.cypher({ query, params: { login }, lean: true }, (err, result) => {
-    if (err) cb(err, null)
+    if (err) {
+      console.log(err)
+      cb(err, null)
+    }
     cb(null, result[0].u)
   })
 }
@@ -37,11 +40,14 @@ export const findById = (id, cb) => {
 
 export const findOrCreate = ({ login, id }, cb) => {
   const query = `
-    MERGE (u:User { login: { login }, id: { id }})
+    MERGE (u:User { login: { login }, id: { id } })
     RETURN u
   `
   db.cypher({ query, params: { login, id }, lean: true }, (err, result) => {
-    if (err) cb(err, null)
+    if (err) {
+      console.log(err)
+      cb(err, null)
+    }
     cb(null, result[0].u)
   })
 }

@@ -1,5 +1,5 @@
 import passport from 'passport'
-import GitHubStrategy from 'passport-github'
+import GitHubStrategy from 'passport-github2'
 import * as User from './models/user'
 
 passport.use(new GitHubStrategy({
@@ -7,23 +7,28 @@ passport.use(new GitHubStrategy({
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: process.env.GITHUB_CALLBACK_URL
 }, (accessToken, refreshToken, profile, done) => {
-  console.log(accessToken)
-  console.log(profile)
   User.findOrCreate({ login: profile.username, id: parseInt(profile.id) }, (err, user) => {
-    if (err) done(err, null)
-    console.log(user)
-    // user.token = accessToken
-
     User.createStarGraph(user.login, accessToken, (err, repo) => {
-      if (err) done(err, null)
+      if (err) console.log(err)
+      return
     })
-
     User.createSocialGraph(user.login, accessToken, (err, repo) => {
-      if (err) done(err, null)
+      if (err) console.log(err)
+      return
     })
-
-    done(null, user)
+    done(err, user)
   })
 }))
+
+
+passport.serializeUser((user, done) => {
+  done(null, user.login)
+})
+
+passport.deserializeUser((login, done) => {
+  User.findByUsername(login, (err, user) => {
+    done(err, user)
+  })
+})
 
 export default passport

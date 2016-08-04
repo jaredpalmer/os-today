@@ -4,7 +4,7 @@ import s from './RepoList.css'
 
 const RepoList = ({ repos }) => (
   <div className={s.root}>
-    {repos.map((repo) => <RepoListItem repo={repo} key={repo.id} />)}
+    {repos.map((repo) => <RepoListItem repo={repo} key={repo.repo.id} />)}
   </div>
 )
 

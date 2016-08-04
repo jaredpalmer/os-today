@@ -4,30 +4,28 @@ import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
 import path from 'path'
-import cookieParser from 'cookie-parser'
 import serialize from 'serialize-javascript'
 import session from 'express-session'
 const RedisStore = require('connect-redis')(session)
 import errorhandler from 'errorhandler'
 
-import User from './models/user'
+import * as User from './models/user'
 import passport from './auth'
 
 const __PROD__ = process.env.NODE_ENV === 'production'
 let config, assets
 
 const server = express()
-
 server.disable('x-powered-by')
-server.use(bodyParser.json())
+server.use(express.static('public'))
 server.use(bodyParser.urlencoded({ extended: true }))
-server.use(cookieParser(process.env.COOKIE_SECRET || 'keyboard cat'))
+server.use(bodyParser.json())
 server.use(session({
   store: new RedisStore({ url: process.env.REDIS_URL || 'redis://localhost:6379' }),
-  secret: process.env.COOKIE_SECRET || 'keyboard cat',
+  secret: process.env.SESSION_SECRET || 'keyboard cat',
   resave: false,
-  saveUninitialized: true,
-  key: 'sessionId', // Use generic cookie name for security purposes
+  saveUninitialized: false,
+  key: 'sessionId2', // Use generic cookie name for security purposes
   cookie: {
     httpOnly: true, // Add HTTPOnly, Secure attributes on Session Cookie
     secure: false // If secure is set, and you access your site over HTTP, the cookie will not be set
@@ -66,15 +64,13 @@ if (__PROD__) {
   server.use(webpackHotMiddleware(compiler))
 }
 
-server.use(express.static(path.join(__dirname, '../public')))
-
 server.get('/auth/github', passport.authenticate('github', { scope: ['user', 'public_repo'] }))
 
 server.get('/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect('/')
-  })
+  passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
 
 server.get('/logout', (req, res) => {
   req.logout()
@@ -84,8 +80,7 @@ server.get('/logout', (req, res) => {
 server.get('/api/feed', (req, res, next) => {
   User.getSuggestions(req.user.login, (err, results) => {
     if (err) next(err)
-    const niceResults = results.map(repo => repo.p)
-    res.json(niceResults)
+    res.json(results)
   })
 })
 
