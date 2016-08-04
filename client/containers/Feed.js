@@ -13,7 +13,7 @@ class Feed extends React.Component {
 
   componentDidMount () {
     this.setState({ isLoading: true, repos: [] })
-    fetch(`https://api.github.com/users/${window.__STATE__.user.login}/starred`)
+    fetch(`/api/feed`)
     .then(res => res.json())
     .then(res => this.setState({repos: res, isLoading: false}))
   }

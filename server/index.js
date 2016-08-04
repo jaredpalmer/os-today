@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser'
 import serialize from 'serialize-javascript'
 import session from 'express-session'
 const RedisStore = require('connect-redis')(session)
+import errorhandler from 'errorhandler'
+
+import User from './models/user'
 import passport from './auth'
 
 const __PROD__ = process.env.NODE_ENV === 'production'
@@ -78,6 +81,14 @@ server.get('/logout', (req, res) => {
   res.redirect('/login')
 })
 
+server.get('/api/feed', (req, res, next) => {
+  User.getSuggestions(req.user.login, (err, results) => {
+    if (err) next(err)
+    const niceResults = results.map(repo => repo.p)
+    res.json(niceResults)
+  })
+})
+
 server.get('/*', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -101,6 +112,8 @@ server.get('/*', (req, res) => {
     </html>
   `)
 })
+
+server.use(errorhandler())
 
 server.listen(process.env.PORT || 5000, () => {
   console.log('Listening on port 5000')

@@ -1,35 +1,31 @@
 import db from './db'
+import fetch from 'isomorphic-fetch'
 
 /**
- * Create a User node
+ * Create a Repo node
  */
-export const create = (options) => {
-  const session = db.session()
-  const q = `
-    CREATE (r:Repo { options })
-    RETURN r
-  `
-  return session
-    .run(q, { options })
-    .then(result => {
-      session.close()
-      return result.records[0].get('r').properties
-    })
-}
+ export const findOrCreate = ({ id, name, url, html_url }, cb) => {
+   const query = `
+     MERGE (r:Repo { id: { id }, name: { name }, url: { url }, html_url: { html_url } })
+     RETURN r
+   `
+   db.cypher({ query, params: { id, name, url, html_url }, lean: true }, (err, result) => {
+     if (err) cb(err, null)
+     cb(null, result[0].r)
+   })
+ }
 
 /**
  * Star a repo
  */
-export const star = (username, repoId) => {
-  const session = db.session()
-  const q = `
-    MATCH (u:User { login: { username } }), (repo:Repo { id: { repoId  } })
+export const star = (login, { id, name, url, html_url }, cb) => {
+  const query = `
+    MATCH (u:User { login: { login } }), (repo:Repo { id: { id }, name: { name }, url: { url }, html_url: { html_url } })
     MERGE (u)-[r:STARRED]->(repo)
+    RETURN repo
   `
-  return session
-    .run(q, { username, repoId })
-    .then((result) => {
-      // session.close()
-      return result
-    })
+  db.cypher({ query, params: { login, id, name, url, html_url }, lean: true }, (err, result) => {
+    if (err) cb(err, null)
+    cb(null,result[0].repo)
+  })
 }
