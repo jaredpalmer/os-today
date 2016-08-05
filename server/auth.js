@@ -14,11 +14,12 @@ passport.use(new GitHubStrategy({
     followers: profile._json.followers,
     avatar_url: profile._json.avatar_url
   }, (err, user) => {
-    User.createStarGraph(user.login, accessToken, 0, (err, repo) => {
+    User.createStarGraph(user.login, accessToken, 0, (err, repos) => {
       if (err) console.log(err)
+      console.log(`create/updated ${repos.length} repos`)
       return
     })
-    User.createSocialGraph(user.login, accessToken, (err, repo) => {
+    User.createSocialGraph(user.login, accessToken, (err, results) => {
       if (err) console.log(err)
       return
     })
