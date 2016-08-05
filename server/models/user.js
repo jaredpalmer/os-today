@@ -38,9 +38,10 @@ export const findById = (id, cb) => {
   })
 }
 
-export const findOrCreate = ({ login, id }, cb) => {
+export const findOrCreate = ({ login, id, avatar_url, followers }, cb) => {
   const query = `
-    MERGE (u:User { login: { login }, id: { id } })
+    MERGE (u:User { login: { login } })
+    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}
     RETURN u
   `
   db.cypher({ query, params: { login, id }, lean: true }, (err, result) => {
@@ -51,6 +52,27 @@ export const findOrCreate = ({ login, id }, cb) => {
     cb(null, result[0].u)
   })
 }
+
+
+export const findOrCreateUserAndFollow = (myLogin, friend, cb) => {
+  const query = `
+    MATCH (u:User { login: { myLogin } })
+    MERGE (f:User { login: { login } })
+    ON CREATE SET f.id = {id}, f.avatar_url = {avatar_url}, f.followers = {followers}
+    MERGE (u)-[r:FOLLOWING]->(f)
+    RETURN f
+  `
+  const { login, id, avatar_url, followers } = friend
+  db.cypher({ query, params: { myLogin, login, id, avatar_url, followers }, lean: true }, (err, result) => {
+    if (err) {
+      console.log(err)
+      cb(err, null)
+    }
+    cb(null, result[0].f)
+  })
+}
+
+
 
 export const getFollowing = (login, token, cb) => {
   // request(`https://api.github.com/users/${login}/following?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
@@ -88,7 +110,7 @@ export const createStarGraph = (login, token, page, cb) => {
       if (err) throw err
       starredRepos.map(repo => {
         // Add any new repos to graph
-        Repo.findOrCreate({
+        Repo.findOrCreateRepoAndStar(login, {
           id: repo.id,
           name: repo.name,
           full_name: repo.full_name,
@@ -96,15 +118,9 @@ export const createStarGraph = (login, token, page, cb) => {
           html_url: repo.html_url,
           description: repo.description,
           avatar_url: repo.owner.avatar_url
-        }, (err, repo) => {
-          if (err) throw err
-          console.log(`created ${repo.name}`)
-          // Make star relations
-          Repo.star(login, repo.id, (err, newRepo) => {
-            if (err) throw err
-            console.log(`${login} starred ${newRepo.name}`)
-            return
-          })
+        }, (err, newRepo) => {
+          console.log(`${login} starred ${newRepo.name}`)
+          cb(err, newRepo)
         })
       })
     })
@@ -122,17 +138,12 @@ export const createSocialGraph = (login, token, cb) => {
       if (err) throw err
       friendList.map(friend => {
         // Add them to the graph
-        findOrCreate({login: friend.login, id: friend.id}, (err, friend) => {
-          if (err) throw err
-          // Follow them
-          follow(login, friend.login, (err, friend) => {
+        findOrCreateUserAndFollow(login, friend, (err, friend) => {
             if (err) throw err
             // Get their stars
             createStarGraph(friend.login, token, 0, cb)
-          })
         })
       })
-      return
     })
   } catch (e) {
     cb(e, null)
