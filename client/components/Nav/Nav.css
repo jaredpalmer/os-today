@@ -26,12 +26,14 @@
   line-height: 50px;
   margin-right: 2rem;
   text-decoration: none;
+  max-width: 100px;
 }
 
 .RightLink {
   color: #fff;
   font-size: 14px;
   line-height: 50px;
+  max-width: 100px;
   margin-left: 2rem;
   text-decoration: none;
 }

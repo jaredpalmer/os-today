@@ -8,7 +8,7 @@ passport.use(new GitHubStrategy({
   callbackURL: process.env.GITHUB_CALLBACK_URL
 }, (accessToken, refreshToken, profile, done) => {
   User.findOrCreate({ login: profile.username, id: parseInt(profile.id) }, (err, user) => {
-    User.createStarGraph(user.login, accessToken, (err, repo) => {
+    User.createStarGraph(user.login, accessToken, 0, (err, repo) => {
       if (err) console.log(err)
       return
     })

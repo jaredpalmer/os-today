@@ -54,15 +54,15 @@ export const findOrCreate = ({ login, id }, cb) => {
 
 export const getFollowing = (login, token, cb) => {
   // request(`https://api.github.com/users/${login}/following?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/following?per_page=30&access_token=${token}`, (err, res) => {
+  request(`https://api.github.com/users/${login}/following?per_page=90&access_token=${token}`, (err, res) => {
     if (err) cb(err, null)
     cb(null, res.body)
   })
 }
 
-export const getStarred = (login, token, cb) => {
+export const getStarred = (login, token, page, cb) => {
   // request(`https://api.github.com/users/${login}/starred?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/starred?per_page=30&access_token=${token}`, (err, res) => {
+  request(`https://api.github.com/users/${login}/starred?per_page=30&page=${page}&access_token=${token}`, (err, res) => {
     if (err) cb(err, null)
     cb(null, res.body)
   })
@@ -81,21 +81,29 @@ export const follow = (myLogin, friendLogin, cb) => {
 }
 
 // Onboard a new user (get their own stars and create edges)
-export const createStarGraph = (login, token, cb) => {
+export const createStarGraph = (login, token, page, cb) => {
   try {
     // Get your own stars
-    getStarred(login, token, (err, starredRepos) => {
+    getStarred(login, token, page, (err, starredRepos) => {
       if (err) throw err
       starredRepos.map(repo => {
         // Add any new repos to graph
-        Repo.findOrCreate({id: repo.id, name: repo.name, url: repo.url, html_url: repo.html_url }, (err, repo) => {
+        Repo.findOrCreate({
+          id: repo.id,
+          name: repo.name,
+          full_name: repo.full_name,
+          url: repo.url,
+          html_url: repo.html_url,
+          description: repo.description,
+          avatar_url: repo.owner.avatar_url
+        }, (err, repo) => {
           if (err) throw err
           console.log(`created ${repo.name}`)
           // Make star relations
-          Repo.star(login, {id: repo.id, name: repo.name, url: repo.url, html_url: repo.html_url }, (err, newRepo) => {
+          Repo.star(login, repo.id, (err, newRepo) => {
             if (err) throw err
             console.log(`${login} starred ${newRepo.name}`)
-            cb(null, newRepo)
+            return
           })
         })
       })
@@ -120,10 +128,11 @@ export const createSocialGraph = (login, token, cb) => {
           follow(login, friend.login, (err, friend) => {
             if (err) throw err
             // Get their stars
-            createStarGraph(friend.login, token, cb)
+            createStarGraph(friend.login, token, 0, cb)
           })
         })
       })
+      return
     })
   } catch (e) {
     cb(e, null)

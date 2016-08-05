@@ -1,9 +1,16 @@
 .root {
-  margin: 1rem;
+  margin: 1rem auto;
+  width: 100%;
+}
+
+.Content {
+  margin: 0 auto;
+  max-width: 400px;
+  text-align: center;
 }
 
 .SignIn {
-  margin: 1rem 0 1rem;
+  margin: 1rem auto;
 }
 
 .GithubIcon {
@@ -21,4 +28,20 @@
   font-weight: bold;
   text-decoration: none;
   text-transform: lowercase;
+  display: block;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.tagline {
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+.content {
+  margin-bottom: 1.5rem;
+}
+
+.bold {
+  font-weight: bold;
 }

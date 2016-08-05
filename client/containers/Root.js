@@ -3,6 +3,7 @@ import { Provider } from 'react-redux'
 import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 import App from './App'
 import LoginView from '../components/LoginView'
+import AboutView from '../components/AboutView'
 import NotFoundView from '../components/NotFoundView'
 import Feed from './Feed'
 import { UserAuthWrapper } from 'redux-auth-wrapper'
@@ -25,6 +26,7 @@ const Root = ({ store }) => (
             other routes are loaded according to the component
             property specified here */}
         <IndexRoute component={UserIsAuthenticated(Feed)} />
+        <Route path='about' component={AboutView} />
         <Route path='login' component={LoginView} />
         <Route path='*' component={NotFoundView} />
       </Route>

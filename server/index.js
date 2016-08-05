@@ -25,7 +25,7 @@ server.use(session({
   secret: process.env.SESSION_SECRET || 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  key: 'sessionId2', // Use generic cookie name for security purposes
+  key: 'sessionId3', // Use generic cookie name for security purposes
   cookie: {
     httpOnly: true, // Add HTTPOnly, Secure attributes on Session Cookie
     secure: false // If secure is set, and you access your site over HTTP, the cookie will not be set
