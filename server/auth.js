@@ -7,7 +7,13 @@ passport.use(new GitHubStrategy({
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
   callbackURL: process.env.GITHUB_CALLBACK_URL
 }, (accessToken, refreshToken, profile, done) => {
-  User.findOrCreate({ login: profile.username, id: parseInt(profile.id) }, (err, user) => {
+  User.findOrCreate({
+    login: profile.username,
+    id: profile._json.id,
+    email: profile.emails[0].value,
+    followers: profile._json.followers,
+    avatar_url: profile._json.avatar_url
+  }, (err, user) => {
     User.createStarGraph(user.login, accessToken, 0, (err, repo) => {
       if (err) console.log(err)
       return
@@ -19,7 +25,6 @@ passport.use(new GitHubStrategy({
     done(err, user)
   })
 }))
-
 
 passport.serializeUser((user, done) => {
   done(null, user.login)

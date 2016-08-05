@@ -38,13 +38,14 @@ export const findById = (id, cb) => {
   })
 }
 
-export const findOrCreate = ({ login, id, avatar_url, followers }, cb) => {
+export const findOrCreate = ({ login, id, avatar_url, followers, email }, cb) => {
   const query = `
     MERGE (u:User { login: { login } })
-    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}
+    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}, u.email = {email}
+    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}, u.email = {email}
     RETURN u
   `
-  db.cypher({ query, params: { login, id }, lean: true }, (err, result) => {
+  db.cypher({ query, params: { login, id, avatar_url, followers, email }, lean: true }, (err, result) => {
     if (err) {
       console.log(err)
       cb(err, null)
@@ -117,7 +118,8 @@ export const createStarGraph = (login, token, page, cb) => {
           url: repo.url,
           html_url: repo.html_url,
           description: repo.description,
-          avatar_url: repo.owner.avatar_url
+          avatar_url: repo.owner.avatar_url,
+          stargazers_count: repo.stargazers_count
         }, (err, newRepo) => {
           console.log(`${login} starred ${newRepo.name}`)
           cb(err, newRepo)
@@ -153,7 +155,6 @@ export const createSocialGraph = (login, token, cb) => {
 export const getSuggestions = (login, cb) => {
   const query = `
   MATCH (me:User {login: { login }})-[f:FOLLOWING]->(u:User)-[l:STARRED]->(repo:Repo)
-  WHERE NOT (me)-[:STARRED]->(repo)
   RETURN repo, count(l) AS likes
   ORDER BY likes DESC
   LIMIT 50

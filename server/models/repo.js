@@ -55,12 +55,13 @@ export const findOrCreateRepoAndStar = (login, repo, cb) => {
   const query = `
     MATCH (u:User { login: { login } })
     MERGE (repo:Repo { id: { id } })
-    ON CREATE SET repo.name = {name}, ${repo.description ? 'repo.description = {description}, ' : ''} repo.full_name = {full_name}, repo.avatar_url = {avatar_url}, repo.url = {url}, repo.html_url = {html_url}
+    ON MATCH SET repo.name = {name}, ${repo.description ? 'repo.description = {description}, ' : ''} repo.full_name = {full_name}, repo.avatar_url = {avatar_url}, repo.url = {url}, repo.html_url = {html_url}, repo.stargazers_count = {stargazers_count}
+    ON CREATE SET repo.name = {name}, ${repo.description ? 'repo.description = {description}, ' : ''} repo.full_name = {full_name}, repo.avatar_url = {avatar_url}, repo.url = {url}, repo.html_url = {html_url}, repo.stargazers_count = {stargazers_count}
     MERGE (u)-[r:STARRED]->(repo)
     RETURN repo
   `
-  const { id, name, description, avatar_url, full_name, url, html_url } = repo
-  db.cypher({ query, params: { login, id, name, description, avatar_url, full_name, url, html_url }, lean: true }, (err, result) => {
+  const { id, name, description, avatar_url, full_name, url, html_url, stargazers_count } = repo
+  db.cypher({ query, params: { login, id, name, description, avatar_url, full_name, url, html_url, stargazers_count }, lean: true }, (err, result) => {
     if (err) cb(err, null)
     cb(null,result[0].repo)
   })
