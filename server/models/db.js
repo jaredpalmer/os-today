@@ -1,7 +1,8 @@
-const neo4j = require('neo4j')
+import neo4j from 'neo4j'
+import config from '../config'
 
 const db = new neo4j.GraphDatabase({
-  url: process.env.GRAPHENEDB_URL || 'http://neo4j:neo5j@localhost:7474',
+  url: config.neo4jURL
   // auth: null  // optional; see below for more details
   // headers: {},    // optional defaults, e.g. User-Agent
   // proxy: null,    // optional URL
