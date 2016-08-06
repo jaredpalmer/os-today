@@ -12,17 +12,6 @@ medium works but with a time window.
  - Only considers last 30 friends and 30 stars. Need to modify `getStarred` and `getFollowing` to fetch `Link` headers from GitHub's API.
  - Really **needs a read/write queue** (have seen the Financial Times using this technique) and several other workers.
 
-## Roadmap
-  - Include your friends username's who starred the project. Like FB: 'Joe, Bob, and 5 other friends starred'
-  - Throng (lightweight PM2)
-  - RabbitMQ and worker dynos
-  - About page
-  - Track clicks and create `VIEWED` relations, remove these from suggestions?
-  - Handle recency? Only look at recent stars over the past week / month?
-  - Switch perspectives to another user. Since everything is public there is no reason
-  why it wouldn't be possible. Imagine viewing Linus Torvalds's / Jake Wharton's suggestions? Would be cool.
-  - Generate a daily newletter
-
 ### Requirements
 
   - git
