@@ -10,19 +10,17 @@ passport.use(new GitHubStrategy({
   User.findOrCreate({
     login: profile.username,
     id: profile._json.id,
-    email: profile.emails[0].value,
+    email: profile.emails ? profile.emails[0].value : profile._json.email,
     followers: profile._json.followers,
     avatar_url: profile._json.avatar_url
   }, (err, user) => {
     // TODO move these to worker dyno
     User.createStarGraph(user.login, accessToken, 1, (err, repos) => {
       if (err) console.log(err)
-      console.log(`created/updated ${repos.length} repos`)
       return
     })
     User.createSocialGraph(user.login, accessToken, (err, results) => {
       if (err) console.log(err)
-      console.log(`created/updated ${results.length} repos`)
       return
     })
     done(err, user)

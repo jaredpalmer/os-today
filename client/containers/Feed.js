@@ -23,9 +23,15 @@ class Feed extends React.Component {
   render () {
     return (
       <div>
-        {this.state.isLoading
-          ? <div style={{margin: '1rem', fontWeight: '900', fontSize: '1.5rem'}}>Loading....</div>
-          : <RepoList repos={this.state.repos} />}
+        {this.state.isLoading &&
+          <div style={{margin: '1rem', fontWeight: '900', fontSize: '1.5rem'}}>Loading....</div>
+        }
+        {!this.state.isLoading && !this.state.repos.length > 0 &&
+          <div style={{margin: '1rem', fontWeight: '900', fontSize: '1.5rem'}}>Go star some stuff!</div>
+        }
+        {!this.state.isLoading && this.state.repos.length > 0 &&
+          <RepoList repos={this.state.repos} />
+        }
       </div>
     )
   }

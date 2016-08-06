@@ -68,8 +68,8 @@ export const findById = (id, cb) => {
 export const findOrCreate = ({ login, id, avatar_url, followers, email }, cb) => {
   const query = `
     MERGE (u:User { login: { login } })
-    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}, u.email = {email}
-    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}, u.email = {email}
+    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}  ${email ? ', u.email = {email} ' : ''}
+    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers} ${email ? ', u.email = {email} ' : ''}
     RETURN u
   `
   db.cypher({ query, params: { login, id, avatar_url, followers, email }, lean: true }, (err, result) => {
