@@ -4,8 +4,7 @@ import s from './LoginView.css'
 const LoginView = () => (
   <div className={s.root}>
     <div className={s.Content}>
-      <h1 className={s.tagline}>GitHub Projects, just for you</h1>
-      <h2 className={s.content}>How it works</h2>
+      <h1 className={s.tagline}>GitHub projects, just for you</h1>
       <div className={s.content}>When you login to the app, it creates a graph of your starred repositories. Next, it finds all the users you follow and their stars. Finally, it calculates which projects your friends have starred but you haven't, and then sorts.</div>
       <div className={s.SignIn}>
         <a href='/auth/github' className={s.Github}>

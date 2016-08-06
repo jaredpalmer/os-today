@@ -10,9 +10,10 @@
 }
 
 .Brand {
-  font-size: 14px;
+  font-size: 20px;
   line-height: 50px;
   text-transform: lowercase;
+  font-weight: 900;
 }
 
 .BrandLink {
@@ -36,4 +37,5 @@
   max-width: 100px;
   margin-left: 2rem;
   text-decoration: none;
+  font-family: Menlo, monospace;
 }

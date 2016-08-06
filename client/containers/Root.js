@@ -21,15 +21,15 @@ const Root = ({ store }) => (
   <Provider store={store}>
     <Router history={browserHistory}>
       {/* 'App' acts as a wrapper for the child components */}
+      <Route path='login' component={LoginView} />
       <Route path='/' component={App}>
         {/* IndexRoute is the initial component that is loaded,
             other routes are loaded according to the component
             property specified here */}
         <IndexRoute component={UserIsAuthenticated(Feed)} />
-        <Route path='about' component={AboutView} />
-        <Route path='login' component={LoginView} />
-        <Route path='*' component={NotFoundView} />
+        {/* <Route path='about' component={AboutView} /> */}
       </Route>
+      <Route path='*' component={NotFoundView} />
     </Router>
   </Provider>
 )

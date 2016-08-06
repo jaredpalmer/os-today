@@ -24,10 +24,9 @@
   /*background: #111;*/
   border: 2px solid #111;
   color: #111;
-  padding: 1rem 2rem;
-  font-weight: bold;
+  padding: .75rem 2rem;
+  font-weight: 900;
   text-decoration: none;
-  text-transform: lowercase;
   display: block;
   max-width: 300px;
   margin: 0 auto;
@@ -35,7 +34,8 @@
 
 .tagline {
   margin-bottom: 1.5rem;
-  font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 900;
 }
 
 .content {
