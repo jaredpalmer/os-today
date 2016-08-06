@@ -25,7 +25,10 @@
 
 .RepoNameLink {
   color: #111;
+  font-weight: 900;
   text-decoration:none;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .Description {
@@ -33,6 +36,7 @@
   font-size: 13px;
   line-height: 1.4;
   font-weight: 400;
+  font-family: Menlo, monospace;
 }
 
 .Avatar {
