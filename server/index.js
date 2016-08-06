@@ -83,6 +83,7 @@ server.get('/api/feed', (req, res, next) => {
     res.json(results)
   })
 })
+
 server.get('/api/popular', (req, res, next) => {
   User.getPopular(req.user.login, (err, results) => {
     if (err) next(err)
