@@ -1,5 +1,4 @@
 import db from './db'
-import * as Repo from './repo'
 import request from 'superagent'
 
 export const getFollowing = (login, token, cb) => {
