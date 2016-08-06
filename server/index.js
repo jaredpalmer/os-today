@@ -24,14 +24,14 @@ function createServer (config) {
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
   app.use(session({
-    store: new RedisStore({ url: config.REDIS_URL }),
+    store: new RedisStore({ url: config.redisURL }),
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
     key: 'sessionId5', // Use generic cookie name for security purposes
     cookie: {
       httpOnly: true, // Add HTTPOnly, Secure attributes on Session Cookie
-      secure: false // If secure is set, and you access your site over HTTP, the cookie will not be set
+      secure: __PROD__ // If secure is set, and you access your site over HTTP, the cookie will not be set
     }
   }))
   app.use(passport.initialize())
