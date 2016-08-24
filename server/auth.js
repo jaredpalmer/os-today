@@ -12,7 +12,8 @@ passport.use(new GitHubStrategy({
     id: profile._json.id,
     email: profile.emails ? profile.emails[0].value : profile._json.email,
     followers: profile._json.followers,
-    avatar_url: profile._json.avatar_url
+    avatar_url: profile._json.avatar_url,
+    token: accessToken
   }, (err, user) => {
     // TODO move these to worker dyno
     User.createStarGraph(user.login, accessToken, 1, (err, repos) => {

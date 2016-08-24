@@ -65,14 +65,14 @@ export const findById = (id, cb) => {
   })
 }
 
-export const findOrCreate = ({ login, id, avatar_url, followers, email }, cb) => {
+export const findOrCreate = ({ login, id, avatar_url, followers, token, email }, cb) => {
   const query = `
     MERGE (u:User { login: { login } })
-    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}  ${email ? ', u.email = {email} ' : ''}
-    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers} ${email ? ', u.email = {email} ' : ''}
+    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}, u.token = {token}  ${email ? ', u.email = {email} ' : ''}
+    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}, u.token = {token} ${email ? ', u.email = {email} ' : ''}
     RETURN u
   `
-  db.cypher({ query, params: { login, id, avatar_url, followers, email }, lean: true }, (err, result) => {
+  db.cypher({ query, params: { login, id, avatar_url, followers, token, email }, lean: true }, (err, result) => {
     if (err) {
       console.log(err)
       cb(err, null)
@@ -158,15 +158,16 @@ export const createSocialGraph = (login, token, cb) => {
   }
 }
 
-export const getSuggestions = (login, cb) => {
+export const getSuggestions = (login, skip, cb) => {
   const query = `
   MATCH (me:User {login: { login }})-[f:FOLLOWING]->(u:User)-[l:STARRED]->(repo:Repo)
   WHERE NOT (me)-[:STARRED]->(repo)
   RETURN repo, count(l) AS likes, collect(u.login) AS friends
   ORDER BY likes DESC
+  SKIP {skip}
   LIMIT 50
   `
-  db.cypher({ query, params: { login }, lean: true }, (err, result) => {
+  db.cypher({ query, params: { login, skip }, lean: true }, (err, result) => {
     if (err) cb(err, null)
     cb(null, result)
   })

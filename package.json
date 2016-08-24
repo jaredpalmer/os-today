@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "My react seed project",
   "scripts": {
-    "start": "babel-node ./server",
+    "start": "heroku local -f Procfile.local",
     "build": "npm run build-client && npm run build-server",
     "build-client": "webpack --config ./tools/webpack.prod",
     "build-server": "rimraf lib && babel ./server -d lib --copy-files",
@@ -30,7 +30,6 @@
     "body-parser": "^1.15.1",
     "compression": "^1.6.2",
     "connect-redis": "^3.1.0",
-    "cookie-parser": "^1.4.3",
     "css-loader": "^0.23.1",
     "dotenv": "^2.0.0",
     "errorhandler": "^1.4.3",
