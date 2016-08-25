@@ -81,29 +81,6 @@ function createServer (config) {
 
   app.use('/api/v0/users/', userApi)
 
-  // app.get('/api/feed/:page', (req, res, next) => {
-  //   const skip = req.params.page ? req.params.page * 50 : 0
-  //   User.getSuggestions(req.user.login, skip, (err, results) => {
-  //     if (err) next(err)
-  //     res.json(results)
-  //   })
-  // })
-  //
-  // app.get('/api/refresh', (req, res, next) => {
-  //   User.createStarGraph(req.user.login, req.user.token, (err, repos) => {
-  //     if (err) console.log(err)
-  //     if (!repos) res.json({error: true, msg: 'no repos created'})
-  //     res.json(repos)
-  //   })
-  // })
-  //
-  // app.get('/api/popular', (req, res, next) => {
-  //   User.getPopular(req.user.login, (err, results) => {
-  //     if (err) next(err)
-  //     res.json(results)
-  //   })
-  // })
-
   app.get('/*', (req, res) => {
     res.send(`
       <!DOCTYPE html>
@@ -128,14 +105,7 @@ function createServer (config) {
     `)
   })
 
-  app.use((err, req, res, next) => {
-    if (err) {
-      console.log('caught an error')
-      console.log(err)
-      res.send(err)
-    }
-    next()
-  })
+  app.use(errorhandler())
 
   const server = http.createServer(app)
 
