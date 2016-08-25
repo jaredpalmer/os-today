@@ -88,8 +88,7 @@ function createServer (config) {
   })
 
   app.get('/api/refresh', (req, res, next) => {
-    console.log(req.user)
-    User.createStarGraph(req.user.login, req.user.token, 1, (err, repos) => {
+    User.createStarGraph(req.user.login, req.user.token, (err, repos) => {
       if (err) console.log(err)
       if (!repos) res.json({error: true, msg: 'no repos created'})
       res.json(repos)
