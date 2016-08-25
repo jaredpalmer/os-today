@@ -1,1 +1,2 @@
 web: NODE_ENV=development node -r 'babel-register' ./server
+users: NODE_ENV=development node -r 'babel-register' ./server/users/service

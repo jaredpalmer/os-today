@@ -17,7 +17,7 @@ class Feed extends React.Component {
 
   componentDidMount () {
     this.setState({ isLoading: true, repos: [] })
-    fetch(`/api/feed/${this.state.page}`, {
+    fetch(`/api/v0/users/feed/${this.state.page}`, {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -26,7 +26,7 @@ class Feed extends React.Component {
 
   loadRepos () {
     this.setState({ isLoading: true, repos: [] })
-    fetch(`/api/feed/${this.state.page + 1}`, {
+    fetch(`/api/v0/users/feed/${this.state.page + 1}`, {
       credentials: 'include'
     })
     .then(res => res.json())

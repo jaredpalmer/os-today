@@ -1,6 +1,9 @@
-import db from './db'
+import neo4j from 'neo4j'
 import GClient from 'github'
 
+const db = new neo4j.GraphDatabase({
+  url: process.env.GRAPHENEDB_URL || 'http://neo4j:neo5j@localhost:7474'
+})
 
 export const getFollowing = (login, token, cb) => {
   console.log(`getFollowing for ${login}`)
