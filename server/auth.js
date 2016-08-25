@@ -16,14 +16,18 @@ passport.use(new GitHubStrategy({
     token: accessToken
   }, (err, user) => {
     // TODO move these to worker dyno
-    User.createStarGraph(user.login, accessToken, 1, (err, repos) => {
+    // User.getStarred(user.login, accessToken, (err, repos) => {
+    //   if (err) console.log(err)
+    //   return `repos.length is ${repos.length}`
+    // })
+    User.createStarGraph(user.login, accessToken, (err, repos) => {
       if (err) console.log(err)
       return
     })
-    User.createSocialGraph(user.login, accessToken, (err, results) => {
-      if (err) console.log(err)
-      return
-    })
+    // User.createSocialGraph(user.login, accessToken, (err, results) => {
+    //   if (err) console.log(err)
+    //   return
+    // })
     done(err, user)
   })
 }))

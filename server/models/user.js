@@ -1,5 +1,8 @@
 import db from './db'
 import request from 'superagent'
+import GClient from 'github'
+
+
 
 export const getFollowing = (login, token, cb) => {
   // request(`https://api.github.com/users/${login}/following?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
@@ -9,12 +12,28 @@ export const getFollowing = (login, token, cb) => {
   })
 }
 
-export const getStarred = (login, token, page, cb) => {
-  // request(`https://api.github.com/users/${login}/starred?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/starred?per_page=30&page=${page}&access_token=${token}`, (err, res) => {
-    if (err) cb(err, null)
-    cb(null, res.body)
-  })
+export const getStarred = (login, token, cb) => {
+  const github = new GClient({})
+  github.authenticate({ type: 'oauth', token })
+  github.activity.getStarredRepos({per_page: 100}, getRepos)
+
+  // Recursively fetch a user's starredRepos
+  let starredRepos = []
+  function getRepos (err, res) {
+    if (err) {
+      return cb(err, null)
+    }
+
+    starredRepos = starredRepos.concat(res)
+    if (github.hasNextPage(res)) {
+      github.getNextPage(res, getRepos)
+    } else {
+      console.log(starredRepos.map(repo => repo.full_name))
+      console.log(`@${login} starred repos: ${starredRepos.length}`)
+    }
+  }
+
+  cb(null, starredRepos)
 }
 
 export const create = (options, cb) => {
