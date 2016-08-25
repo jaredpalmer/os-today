@@ -49,8 +49,7 @@ function start () {
       } else {
         reply({
           type: 'users.findByUsername',
-          payload: user,
-          error: true
+          payload: user
         })
       }
     })
@@ -72,8 +71,7 @@ function start () {
       } else {
         reply({
           type: 'users.findOrCreate',
-          payload: user,
-          error: true
+          payload: user
         })
       }
     })
@@ -95,8 +93,7 @@ function start () {
       } else {
         reply({
           type: 'users.getSuggestions',
-          payload: repos,
-          error: true
+          payload: repos
         })
       }
     })
