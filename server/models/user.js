@@ -1,20 +1,57 @@
 import db from './db'
-import request from 'superagent'
+import GClient from 'github'
+
 
 export const getFollowing = (login, token, cb) => {
-  // request(`https://api.github.com/users/${login}/following?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/following?per_page=90&access_token=${token}`, (err, res) => {
-    if (err) cb(err, null)
-    cb(null, res.body)
-  })
+  console.log(`getFollowing for ${login}`)
+  const github = new GClient({})
+  github.authenticate({ type: 'oauth', token })
+  github.users.getFollowingForUser({user: login, per_page: 100}, getFollowing)
+
+  // Recursively fetch the users someone follows
+  let following = []
+  function getFollowing (err, res) {
+    if (err) {
+      return cb(err, null)
+    }
+
+    following = following.concat(res)
+    if (github.hasNextPage(res)) {
+      setTimeout(() => {
+        github.getNextPage(res, getFollowing)
+      }, 15000)
+    } else {
+      console.log(following.map(friend => friend.login))
+      console.log(`@${login} starred repos: ${following.length}`)
+      cb(null, following)
+    }
+  }
 }
 
-export const getStarred = (login, token, page, cb) => {
-  // request(`https://api.github.com/users/${login}/starred?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/starred?per_page=30&page=${page}&access_token=${token}`, (err, res) => {
-    if (err) cb(err, null)
-    cb(null, res.body)
-  })
+export const getStarred = (login, token, cb) => {
+  console.log(`getStarred for ${login}`)
+  const github = new GClient({})
+  github.authenticate({ type: 'oauth', token })
+  github.activity.getStarredReposForUser({user: login, per_page: 100}, getRepos)
+
+  // Recursively fetch a user's starredRepos
+  let starredRepos = []
+  function getRepos (err, res) {
+    if (err) {
+      return cb(err, null)
+    }
+
+    starredRepos = starredRepos.concat(res)
+    if (github.hasNextPage(res)) {
+      setTimeout(() => {
+        github.getNextPage(res, getRepos)
+      }, 15000)
+    } else {
+      console.log(starredRepos.map(repo => repo.full_name))
+      console.log(`@${login} starred repos: ${starredRepos.length}`)
+      cb(null, starredRepos)
+    }
+  }
 }
 
 export const create = (options, cb) => {
@@ -98,10 +135,10 @@ export const findOrCreateUsersAndFollow = (login, friends, cb) => {
 }
 
 // Onboard a new user (get their own stars and create edges)
-export const createStarGraph = (login, token, page, cb) => {
+export const createStarGraph = (login, token, cb) => {
   try {
     // Get your own stars
-    getStarred(login, token, page, (err, repos) => {
+    getStarred(login, token, (err, repos) => {
       if (err) throw err
       // only want to save the things we need
       const starredRepos = repos.map(repo => ({
@@ -149,7 +186,7 @@ export const createSocialGraph = (login, token, cb) => {
         if (err) throw err
         newFriends.forEach(n => {
           // Make their star graphs
-          createStarGraph(n.login, token, 1, cb)
+          createStarGraph(n.login, token, cb)
         })
       })
     })
