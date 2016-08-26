@@ -21,7 +21,7 @@
     "WEB_CONCURRENCY": {
       "description": "The number of processes to run.",
       "value": "2"
-    }.
+    },
     "GITHUB_CLIENT_ID": {
       "description": "A client id from a GitHub OAuth app you created."
     },
