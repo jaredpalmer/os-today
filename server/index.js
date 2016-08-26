@@ -11,7 +11,7 @@ import errorhandler from 'errorhandler'
 import throng from 'throng'
 
 import DefaultServerConfig from './config'
-import * as User from './models/user'
+import userApi from './users/route'
 import passport from './auth'
 
 
@@ -28,7 +28,7 @@ function createServer (config) {
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
-    key: 'sessionId5', // Use generic cookie name for security purposes
+    key: 'sessionId6', // Use generic cookie name for security purposes
     cookie: {
       httpOnly: true, // Add HTTPOnly, Secure attributes on Session Cookie
       secure: false // If secure is set, and you access your site over HTTP, the cookie will not be set
@@ -79,19 +79,7 @@ function createServer (config) {
     res.redirect('/login')
   })
 
-  app.get('/api/feed', (req, res, next) => {
-    User.getSuggestions(req.user.login, (err, results) => {
-      if (err) next(err)
-      res.json(results)
-    })
-  })
-
-  app.get('/api/popular', (req, res, next) => {
-    User.getPopular(req.user.login, (err, results) => {
-      if (err) next(err)
-      res.json(results)
-    })
-  })
+  app.use('/api/v0/users/', userApi)
 
   app.get('/*', (req, res) => {
     res.send(`
@@ -110,8 +98,8 @@ function createServer (config) {
           <script>window.Promise || document.write('\\x3Cscript src=\"/es6-promise.min.js\">\\x3C/script>\\x3Cscript>ES6Promise.polyfill()\\x3C/script>')</script>
           <script>window.fetch || document.write('\\x3Cscript src=\"/fetch.min.js\">\\x3C/script>')</script>
           <script>window.__STATE__=${serialize({user: req.user || null})};</script>
-          <script src="${__PROD__ ? assets.vendor.js : 'assets/vendor.js'}"></script>
-          <script src="${__PROD__ ? assets.main.js : 'assets/main.js'}"></script>
+          <script src="${__PROD__ ? assets.vendor.js : '/assets/vendor.js'}"></script>
+          <script src="${__PROD__ ? assets.main.js : '/assets/main.js'}"></script>
         </body>
       </html>
     `)

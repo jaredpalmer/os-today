@@ -1,20 +1,60 @@
-import db from './db'
-import request from 'superagent'
+import neo4j from 'neo4j'
+import GClient from 'github'
+
+const db = new neo4j.GraphDatabase({
+  url: process.env.GRAPHENEDB_URL || 'http://neo4j:neo5j@localhost:7474'
+})
 
 export const getFollowing = (login, token, cb) => {
-  // request(`https://api.github.com/users/${login}/following?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/following?per_page=90&access_token=${token}`, (err, res) => {
-    if (err) cb(err, null)
-    cb(null, res.body)
-  })
+  console.log(`getFollowing for ${login}`)
+  const github = new GClient({})
+  github.authenticate({ type: 'oauth', token })
+  github.users.getFollowingForUser({user: login, per_page: 100}, getFollowing)
+
+  // Recursively fetch the users someone follows
+  let following = []
+  function getFollowing (err, res) {
+    if (err) {
+      return cb(err, null)
+    }
+
+    following = following.concat(res)
+    if (github.hasNextPage(res)) {
+      setTimeout(() => {
+        github.getNextPage(res, getFollowing)
+      }, 2000)
+    } else {
+      console.log(following.map(friend => friend.login))
+      console.log(`@${login} starred repos: ${following.length}`)
+      cb(null, following)
+    }
+  }
 }
 
-export const getStarred = (login, token, page, cb) => {
-  // request(`https://api.github.com/users/${login}/starred?per_page=100&client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}`, (err, res) => {
-  request(`https://api.github.com/users/${login}/starred?per_page=30&page=${page}&access_token=${token}`, (err, res) => {
-    if (err) cb(err, null)
-    cb(null, res.body)
-  })
+export const getStarred = (login, token, cb) => {
+  console.log(`getStarred for ${login}`)
+  const github = new GClient({})
+  github.authenticate({ type: 'oauth', token })
+  github.activity.getStarredReposForUser({user: login, per_page: 100}, getRepos)
+
+  // Recursively fetch a user's starredRepos
+  let starredRepos = []
+  function getRepos (err, res) {
+    if (err) {
+      return cb(err, null)
+    }
+
+    starredRepos = starredRepos.concat(res)
+    if (github.hasNextPage(res)) {
+      setTimeout(() => {
+        github.getNextPage(res, getRepos)
+      }, 2000)
+    } else {
+      console.log(starredRepos.map(repo => repo.full_name))
+      console.log(`@${login} starred repos: ${starredRepos.length}`)
+      cb(null, starredRepos)
+    }
+  }
 }
 
 export const create = (options, cb) => {
@@ -65,14 +105,14 @@ export const findById = (id, cb) => {
   })
 }
 
-export const findOrCreate = ({ login, id, avatar_url, followers, email }, cb) => {
+export const findOrCreate = ({ login, id, avatar_url, followers, token, email }, cb) => {
   const query = `
     MERGE (u:User { login: { login } })
-    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}  ${email ? ', u.email = {email} ' : ''}
-    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers} ${email ? ', u.email = {email} ' : ''}
+    ON MATCH SET u.avatar_url = {avatar_url}, u.followers = {followers}, u.token = {token}  ${email ? ', u.email = {email} ' : ''}
+    ON CREATE SET u.id = {id}, u.avatar_url = {avatar_url}, u.followers = {followers}, u.token = {token} ${email ? ', u.email = {email} ' : ''}
     RETURN u
   `
-  db.cypher({ query, params: { login, id, avatar_url, followers, email }, lean: true }, (err, result) => {
+  db.cypher({ query, params: { login, id, avatar_url, followers, token, email }, lean: true }, (err, result) => {
     if (err) {
       console.log(err)
       cb(err, null)
@@ -88,6 +128,8 @@ export const findOrCreateUsersAndFollow = (login, friends, cb) => {
     MERGE (u:User { login: f.login })
     ON MATCH SET u.id = f.id, u.avatar_url = f.avatar_url
     ON CREATE SET u.id = f.id, u.avatar_url = f.avatar_url
+    WITH me, u
+    WHERE (me:User) AND (u:User)
     MERGE (me)-[r:FOLLOWING]->(u)
     RETURN collect(u) AS data
   `
@@ -98,10 +140,10 @@ export const findOrCreateUsersAndFollow = (login, friends, cb) => {
 }
 
 // Onboard a new user (get their own stars and create edges)
-export const createStarGraph = (login, token, page, cb) => {
+export const createStarGraph = (login, token, cb) => {
   try {
     // Get your own stars
-    getStarred(login, token, page, (err, repos) => {
+    getStarred(login, token, (err, repos) => {
       if (err) throw err
       // only want to save the things we need
       const starredRepos = repos.map(repo => ({
@@ -119,6 +161,8 @@ export const createStarGraph = (login, token, page, cb) => {
         UNWIND {starredRepos} AS r
         MERGE (repo:Repo { id: r.id })
         ON CREATE SET repo.name = r.name, repo.description = r.description, repo.full_name = r.full_name, repo.avatar_url = r.avatar_url, repo.url = r.url, repo.html_url = r.html_url, repo.stargazers_count = r.stargazers_count
+        WITH u, repo
+        WHERE (u:User) AND (repo:Repo)
         MERGE (u)-[s:STARRED]->(repo)
         RETURN collect(repo) AS data
       `
@@ -149,7 +193,7 @@ export const createSocialGraph = (login, token, cb) => {
         if (err) throw err
         newFriends.forEach(n => {
           // Make their star graphs
-          createStarGraph(n.login, token, 1, cb)
+          createStarGraph(n.login, token, cb)
         })
       })
     })
@@ -158,15 +202,16 @@ export const createSocialGraph = (login, token, cb) => {
   }
 }
 
-export const getSuggestions = (login, cb) => {
+export const getSuggestions = (login, skip, cb) => {
   const query = `
   MATCH (me:User {login: { login }})-[f:FOLLOWING]->(u:User)-[l:STARRED]->(repo:Repo)
   WHERE NOT (me)-[:STARRED]->(repo)
   RETURN repo, count(l) AS likes, collect(u.login) AS friends
   ORDER BY likes DESC
+  SKIP {skip}
   LIMIT 50
   `
-  db.cypher({ query, params: { login }, lean: true }, (err, result) => {
+  db.cypher({ query, params: { login, skip }, lean: true }, (err, result) => {
     if (err) cb(err, null)
     cb(null, result)
   })
