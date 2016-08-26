@@ -1,16 +1,18 @@
 .root {
-  margin: 1rem auto;
+  margin: 4rem auto;
   width: 100%;
 }
 
-.Content {
+.Container {
   margin: 0 auto;
-  max-width: 400px;
+  max-width: 600px;
+  padding: 0 1rem;
   text-align: center;
 }
 
 .SignIn {
   margin: 1rem auto;
+  text-align: center;
 }
 
 .GithubIcon {
@@ -32,16 +34,44 @@
   margin: 0 auto;
 }
 
-.tagline {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+.Tagline {
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
   font-weight: 900;
 }
 
-.content {
+
+.Content {
   margin-bottom: 1.5rem;
+  font-family: Menlo, monospace;
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 14px;
+}
+
+.List {
+  padding-left: 3rem;
 }
 
 .bold {
   font-weight: bold;
+}
+
+@media only screen and (min-width: 480px) {
+  .Tagline {
+    font-size: 2.5rem
+  }
+}
+
+@media only screen and (min-width: 800px) {
+  .Container {
+    max-width: 1000px;
+    padding: 0 4rem;
+  }
+  .Tagline {
+    font-size: 4rem;
+    line-height: 1.2;
+    letter-spacing: -.03em;
+  }
 }

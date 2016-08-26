@@ -1,7 +1,8 @@
 /* global fetch */
 import React from 'react'
-import RepoList from '../components/RepoList'
 import {withRouter} from 'react-router'
+import RepoList from '../components/RepoList'
+import Button from '../components/Button'
 
 class Feed extends React.Component {
   constructor () {
@@ -12,7 +13,6 @@ class Feed extends React.Component {
       page: 0
     }
     this.loadRepos = this.loadRepos.bind(this)
-    this.refreshMyStars = this.refreshMyStars.bind(this)
   }
 
   componentDidMount () {
@@ -33,18 +33,9 @@ class Feed extends React.Component {
     .then(res => this.setState({ repos: res, isLoading: false, page: this.state.page + 1 }))
   }
 
-  refreshMyStars () {
-    fetch('/api/refresh', {
-      credentials: 'include'
-    })
-    .then(res => res.json())
-    .then(res => console.log(res))
-  }
-
   render () {
     return (
       <div>
-        <button onClick={this.refreshMyStars}>Refresh</button>
         {this.state.isLoading &&
           <div style={{margin: '1rem', fontWeight: '900', fontSize: '1.5rem'}}>Loading....</div>
         }
@@ -54,7 +45,9 @@ class Feed extends React.Component {
         {!this.state.isLoading && this.state.repos.length > 0 &&
           <RepoList repos={this.state.repos} />
         }
-        <button onClick={this.loadRepos}>Next</button>
+        <div style={{margin: '0 auto 4rem', padding: '0 1rem'}}>
+          <Button onClick={this.loadRepos}>Next</Button>
+        </div>
       </div>
     )
   }
