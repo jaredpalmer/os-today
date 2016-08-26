@@ -1,12 +1,13 @@
 {
-  "name": "restarter",
-  "version": "1.0.0",
+  "name": "os-today",
+  "version": "0.0.1",
   "description": "My react seed project",
   "scripts": {
     "start": "heroku local -f Procfile.local",
     "build": "npm run build-client && npm run build-server",
     "build-client": "webpack --config ./tools/webpack.prod",
     "build-server": "rimraf lib && babel ./server -d lib --copy-files",
+    "heroku-postinstall": "npm run build",
     "test": "rimraf lib && NODE_ENV=test ./node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill --recursive",
     "test:watch": "npm test -- --watch",
     "coverage": "nyc npm test",
