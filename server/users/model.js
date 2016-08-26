@@ -22,7 +22,7 @@ export const getFollowing = (login, token, cb) => {
     if (github.hasNextPage(res)) {
       setTimeout(() => {
         github.getNextPage(res, getFollowing)
-      }, 15000)
+      }, 2000)
     } else {
       console.log(following.map(friend => friend.login))
       console.log(`@${login} starred repos: ${following.length}`)
@@ -48,7 +48,7 @@ export const getStarred = (login, token, cb) => {
     if (github.hasNextPage(res)) {
       setTimeout(() => {
         github.getNextPage(res, getRepos)
-      }, 15000)
+      }, 2000)
     } else {
       console.log(starredRepos.map(repo => repo.full_name))
       console.log(`@${login} starred repos: ${starredRepos.length}`)
@@ -128,6 +128,8 @@ export const findOrCreateUsersAndFollow = (login, friends, cb) => {
     MERGE (u:User { login: f.login })
     ON MATCH SET u.id = f.id, u.avatar_url = f.avatar_url
     ON CREATE SET u.id = f.id, u.avatar_url = f.avatar_url
+    WITH me, u
+    WHERE (me:User) AND (u:User)
     MERGE (me)-[r:FOLLOWING]->(u)
     RETURN collect(u) AS data
   `
@@ -159,6 +161,8 @@ export const createStarGraph = (login, token, cb) => {
         UNWIND {starredRepos} AS r
         MERGE (repo:Repo { id: r.id })
         ON CREATE SET repo.name = r.name, repo.description = r.description, repo.full_name = r.full_name, repo.avatar_url = r.avatar_url, repo.url = r.url, repo.html_url = r.html_url, repo.stargazers_count = r.stargazers_count
+        WITH u, repo
+        WHERE (u:User) AND (repo:Repo)
         MERGE (u)-[s:STARRED]->(repo)
         RETURN collect(repo) AS data
       `

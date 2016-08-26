@@ -22,7 +22,7 @@ passport.use(new GitHubStrategy({
     expiration: config.serviceTime,
     key: 'users.findOrCreate',
     reply (data) {
-      if (data.message) {
+      if (data.error) {
         done(data.payload, null)
       }
       done(null, data.payload)
@@ -39,7 +39,7 @@ passport.deserializeUser((login, done) => {
     expiration: config.serviceTime,
     key: 'users.findByUsername',
     reply (data) {
-      if (data.message) {
+      if (data.error) {
         done(data.payload, null)
       }
       done(null, data.payload)

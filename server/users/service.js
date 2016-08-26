@@ -23,12 +23,20 @@ function start () {
     .consume(onFindByUsername)
 
   exchange
-    .queue({ name: 'users.findOrCreate' })
+    .queue({ name: 'users.findOrCreate', durable: true })
     .consume(onFindOrCreate)
 
   exchange
-    .queue({ name: 'users.getSuggestions' })
+    .queue({ name: 'users.getSuggestions', durable: true })
     .consume(onGetSuggestions)
+
+  exchange
+    .queue({ name: 'users.createStarGraph', durable: true })
+    .consume(onCreateStarGraph)
+
+  exchange
+    .queue({ name: 'users.createSocialGraph', durable: true })
+    .consume(onCreateSocialGraph)
 
   process.on('SIGTERM', process.exit)
   process.once('uncaughtException', onError)
@@ -94,6 +102,73 @@ function start () {
         reply({
           type: 'users.getSuggestions',
           payload: repos
+        })
+      }
+    })
+  }
+
+  function onCreateStarGraph (message, reply) {
+    logger.log(message)
+    const timer = logger.time('users.createStarGraph').namespace(message)
+    const { login, token } = message
+    User.createStarGraph(login, token, (err, repos) => {
+      timer.log()
+      if (err) {
+        logger.error(err)
+        reply({
+          type: 'users.createStarGraph',
+          error: true,
+          payload: err,
+          message: err.message || 'Could not get create star graph'
+        })
+      } else {
+        reply({
+          type: 'users.createStarGraph',
+          payload: repos
+        })
+      }
+    })
+  }
+
+  // TODO(jlp): make this non-locking
+  function onCreateSocialGraph (message, reply) {
+    logger.log(message)
+    const timer = logger.time('users.createSocialGraph').namespace(message)
+    const followtimer = logger.time('users.getFollowing').namespace(message)
+    const { login, token } = message
+    User.getFollowing(login, token, (err, friendList) => {
+      followtimer.log()
+      if (err) {
+        reply({
+          type: 'users.createSocialGraph',
+          error: true,
+          payload: err,
+          message: err.message || 'Could not create social graph'
+        })
+      } else {
+        const friends = friendList.map(f => ({
+          login: f.login,
+          id: f.id,
+          avatar_url: f.avatar_url
+        }))
+
+        // Add them to the graph
+        User.findOrCreateUsersAndFollow(message.login, friends, (err, newFriends) => {
+          timer.log()
+          if (err) {
+            logger.error(err)
+            reply({
+              type: 'users.createSocialGraph',
+              error: true,
+              payload: err,
+              message: err.message || 'Could not create social graph'
+            })
+          } else {
+            reply({
+              type: 'users.createSocialGraph',
+              payload: newFriends
+            })
+          }
         })
       }
     })

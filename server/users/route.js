@@ -13,16 +13,14 @@ const exchange = rabbit.default()
  */
 router.get('/feed/:page', getSuggestionsData, (req, res, next) => {
   const data = res.locals.data
-  if (data.message) {
-    console.log('error from suggestions')
-    res.json({msg: data.message})
+  if (data.error) {
+    next(data.payload)
   } else {
     res.json(data.payload)
   }
 })
 
 function getSuggestionsData (req, res, next) {
-  console.log('getting suggestions')
   const skip = req.params.page ? req.params.page * 50 : 0
   exchange.publish({ login: req.user.login, skip }, {
     expiration: config.serviceTime,
@@ -33,5 +31,26 @@ function getSuggestionsData (req, res, next) {
     }
   })
 }
+
+router.get('/refresh/social', (req, res, next) => {
+  exchange.publish({ login: req.user.login, token: req.user.token }, {
+    key: 'users.createStarGraph'
+  })
+  exchange.publish({ login: req.user.login, token: req.user.token }, {
+    key: 'users.createSocialGraph',
+    reply (data) {
+      console.log(data.payload.length)
+      data.payload.forEach(n => {
+        // Make their star graphs
+        exchange.publish({login: n.login, token: req.user.token}, {
+          key: 'users.createStarGraph'
+        })
+      })
+    }
+  })
+  res.json({
+    msg: 'requested refresh'
+  })
+})
 
 export default router
