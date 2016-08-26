@@ -1,0 +1,50 @@
+{
+  "name": "Open Source Today",
+  "description": "GitHub Projects just for you",
+  "keywords": [
+    "GitHub",
+    "Neo4j",
+    "React"
+  ],
+  "website": "http://www.os.today",
+  "repository": "https://github.com/jaredpalmer/os-today",
+  "success_url": "/",
+  "env": {
+    "SESSION_SECRET": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "generator": "secret"
+    },
+    "SERVICE_TIME": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "value": "5000"
+    },
+    "WEB_CONCURRENCY": {
+      "description": "The number of processes to run.",
+      "value": "2"
+    }.
+    "GITHUB_CLIENT_ID": {
+      "description": "A client id from a GitHub OAuth app you created."
+    },
+    "GITHUB_CALLBACK_URL": {
+      "description": "A client callback URL from a GitHub OAuth app you created."
+    },
+    "GITHUB_CLIENT_SECRET": {
+      "description": "A client secret from a GitHub OAuth app you created."
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+    },
+    "users-rw": {
+      "quantity": 1
+    }
+  },
+  "image": "heroku/nodejs",
+  "addons": [
+    "graphenedb",
+    "papertrail",
+    "heroku-redis",
+    "cloudamqp"
+  ]
+}
