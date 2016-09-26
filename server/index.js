@@ -66,6 +66,11 @@ function createServer (config) {
     app.use(webpackHotMiddleware(compiler))
   }
 
+  // Let'sEncrypt Route
+  app.get('/.well-known/acme-challenge/:content', (req, res) => {
+    res.send(process.env.LETS_ENCRYPT || 'xxxxxxxxxxxxx')
+  })
+
   app.get('/auth/github', passport.authenticate('github', { scope: ['user', 'public_repo'] }))
 
   app.get('/auth/github/callback',
