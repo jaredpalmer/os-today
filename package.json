@@ -35,7 +35,7 @@
     "dotenv": "^2.0.0",
     "errorhandler": "^1.4.3",
     "express": "^4.13.4",
-    "express-session": "^1.13.0",
+    "express-session": "^1.14.2",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "0.9.0",
     "github": "^2.5.1",
