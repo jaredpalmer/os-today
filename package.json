@@ -71,7 +71,7 @@
     "babel-register": "^6.9.0",
     "expect": "^1.20.1",
     "mocha": "^3.0.1",
-    "nyc": "^8.1.0",
+    "nyc": "^10.0.0",
     "redbox-react": "^1.2.9",
     "standard": "^7.1.2",
     "standard-loader": "^5.0.0",
