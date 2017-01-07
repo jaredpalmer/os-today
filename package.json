@@ -32,7 +32,7 @@
     "compression": "^1.6.2",
     "connect-redis": "^3.1.0",
     "css-loader": "^0.23.1",
-    "dotenv": "^2.0.0",
+    "dotenv": "^4.0.0",
     "errorhandler": "^1.4.3",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
